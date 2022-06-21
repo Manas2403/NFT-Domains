@@ -9,6 +9,7 @@ import edit from "./utils/edit.png";
 import eth from "./utils/ethereum.png";
 import { networks } from "./utils/networks.js";
 import { SiTwitter, SiInstagram, SiDiscord, SiFacebook } from "react-icons/si";
+import CircularProgress from "@mui/material/CircularProgress";
 const tld = ".tetas";
 
 function App() {
@@ -24,7 +25,7 @@ function App() {
   const [mints, setMints] = useState([]);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const [loader, setLoader] = useState(false);
   //Checking if the user metamask wallet is connected or not to the App
   const checkIfWalletIsConnected = async () => {
     const { ethereum } = window;
@@ -109,9 +110,14 @@ function App() {
 
   //Minting a new domain using the contract
   const mintDomain = async () => {
-    if (!currentDomain) return;
+    setLoader(true);
+    if (!currentDomain) {
+      setLoader(false);
+      return;
+    }
     if (currentDomain.length < 3) {
       alert("Domain name must be at least 3 letters long");
+      setLoader(false);
       return;
     }
     const price =
@@ -142,6 +148,7 @@ function App() {
           );
           txn = await contract.setRecord(currentDomain, currentRecord);
           await txn.wait();
+          setLoader(false);
           console.log(
             "Record set! https://mumbai.polygonscan.com/tx/" + txn.hash
           );
@@ -312,9 +319,10 @@ function App() {
         <input
           type="text"
           value={currentRecord}
-          placeholder="who's your favorite star"
+          placeholder="something about your domain"
           onChange={(e) => setCurrentRecord(e.target.value)}
         />
+        {loader ? <CircularProgress color="secondary" /> : ""}
         {editing ? (
           <div className="button-container">
             <button
